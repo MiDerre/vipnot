@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VIPBot — Painel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #090910;
+  --s1:       #10101a;
+  --s2:       #161620;
+  --s3:       #1e1e2e;
+  --border:   #252535;
+  --accent:   #6c63ff;
+  --accent2:  #8b85ff;
+  --green:    #22c55e;
+  --red:      #ef4444;
+  --amber:    #f59e0b;
+  --text:     #e2e2f0;
+  --muted:    #6868a0;
+  --tg:       #2b9fd8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;height:100%;font-size:14px}
+
+/* ── LAYOUT ── */
+.shell{display:grid;grid-template-columns:220px 1fr;grid-template-rows:56px 1fr;min-height:100vh}
+.topbar{grid-column:1/-1;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:14px}
+.topbar .logo{width:32px;height:32px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.topbar h1{font-size:15px;font-weight:600;letter-spacing:-.02em}
+.topbar .badge{margin-left:auto;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;background:#1a2a1a;color:var(--green);border:1px solid #22c55e44}
+.topbar .badge.off{background:#2a1a1a;color:var(--red);border-color:#ef444444}
+
+.sidebar{background:var(--s1);border-right:1px solid var(--border);padding:20px 0;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;border-radius:0;transition:all .12s;border-left:2px solid transparent}
+.nav-item:hover{color:var(--text);background:var(--s2)}
+.nav-item.active{color:var(--text);background:var(--s2);border-left-color:var(--accent)}
+.nav-item .icon{width:18px;text-align:center;flex-shrink:0}
+.nav-sep{height:1px;background:var(--border);margin:10px 16px}
+
+.main{padding:28px 32px;overflow-y:auto;background:var(--bg)}
+.page{display:none}.page.active{display:block}
+
+/* ── CARDS ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.card-title{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;margin-bottom:16px}
+
+/* ── FORM ── */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}
+.field input,.field textarea,.field select{
+  width:100%;background:var(--s3);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:13px;
+  outline:none;transition:border-color .12s
+}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
+.field input::placeholder,.field textarea::placeholder{color:var(--muted)}
+.field textarea{resize:vertical;min-height:90px;line-height:1.5}
+.field select{cursor:pointer}
+.field select option{background:var(--s3)}
+.hint{font-size:11px;color:var(--muted);margin-top:4px}
+
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ── TOGGLE ── */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none;padding-bottom:0}
+.toggle-label{font-size:13px;font-weight:500}
+.toggle-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.toggle{position:relative;width:42px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.slider{position:absolute;inset:0;background:var(--s3);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:.2s}
+.slider:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:.2s}
+.toggle input:checked + .slider{background:#1a2a40;border-color:var(--accent)}
+.toggle input:checked + .slider:before{transform:translateX(18px);background:var(--accent2)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;border:none;transition:all .12s}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent2)}
+.btn-success{background:#14532d;color:var(--green);border:1px solid #22c55e44}.btn-success:hover{background:#16632d}
+.btn-danger{background:#2a0f0f;color:var(--red);border:1px solid #ef444433}.btn-danger:hover{background:#3a1010}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text);border-color:#3a3a60}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+
+/* ── BUTTON LIST ── */
+.btn-list{display:flex;flex-direction:column;gap:8px}
+.btn-item{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.btn-item input{background:transparent;border:none;color:var(--text);font-size:13px;outline:none;font-family:'Inter',sans-serif}
+.btn-item input::placeholder{color:#303060}
+.remove-x{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;padding:0 2px}.remove-x:hover{color:var(--red)}
+.add-line{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px;background:transparent;border:1px dashed var(--border);color:var(--muted);border-radius:8px;cursor:pointer;font-size:12px;font-family:'Inter',sans-serif;width:100%;margin-top:6px;transition:all .12s}
+.add-line:hover{border-color:var(--accent);color:var(--accent2)}
+
+/* ── STATS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px}
+.stat-val{font-size:28px;font-weight:700;letter-spacing:-.03em;color:var(--text)}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:4px;font-weight:500}
+
+.group-list{display:flex;flex-direction:column;gap:8px}
+.group-row{display:flex;align-items:center;justify-content:space-between;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.group-name{font-size:13px;font-weight:500}
+.group-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.group-tag{font-size:11px;padding:3px 8px;border-radius:20px;background:var(--s3);color:var(--muted)}
+
+.log-list{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto}
+.log-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--s2);border-radius:7px;font-size:12px}
+.log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.log-dot.green{background:var(--green)}
+.log-dot.amber{background:var(--amber)}
+.log-time{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;min-width:130px}
+.log-txt{color:var(--text)}
+.log-type{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--s3);color:var(--muted);margin-left:auto;flex-shrink:0}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.ok{background:#14532d;color:var(--green);border:1px solid #22c55e55}
+.toast.err{background:#2a0f0f;color:var(--red);border:1px solid #ef444455}
+
+/* ── PAGE HEADER ── */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.page-title{font-size:18px;font-weight:700;letter-spacing:-.02em}
+.page-sub{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ── DISPATCH CARD ── */
+.dispatch-big{background:linear-gradient(135deg,#1a1a35 0%,#12122a 100%);border:1px solid #2a2a60;border-radius:16px;padding:28px;text-align:center;margin-bottom:16px}
+.dispatch-big h2{font-size:20px;font-weight:700;margin-bottom:8px}
+.dispatch-big p{color:var(--muted);font-size:13px;margin-bottom:24px}
+.dispatch-btn{font-size:15px;padding:14px 32px;border-radius:10px}
+
+.sep-label{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;margin:20px 0 12px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:680px){
+  .shell{grid-template-columns:1fr;grid-template-rows:56px auto 1fr}
+  .sidebar{flex-direction:row;overflow-x:auto;padding:0 8px;border-right:none;border-bottom:1px solid var(--border);grid-row:2}
+  .nav-item{border-left:none;border-bottom:2px solid transparent;padding:14px 12px;white-space:nowrap}
+  .nav-item.active{border-bottom-color:var(--accent);border-left:none}
+  .nav-sep{display:none}
+  .main{padding:20px 16px}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .row2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo">🤖</div>
+    <h1>VIPBot</h1>
+    <span style="color:var(--muted);font-size:12px" id="top-token">—</span>
+    <div class="badge off" id="top-status">Sem token</div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="nav-item active" onclick="nav('stats')"><span class="icon">📊</span> Estatísticas</div>
+    <div class="nav-item" onclick="nav('welcome')"><span class="icon">👋</span> Boas-vindas</div>
+    <div class="nav-item" onclick="nav('broadcast')"><span class="icon">📣</span> Mensagem</div>
+    <div class="nav-item" onclick="nav('dispatch')"><span class="icon">🚀</span> Disparar</div>
+    <div class="nav-item" onclick="nav('auto')"><span class="icon">⏱</span> Automático</div>
+    <div class="nav-sep"></div>
+    <div class="nav-item" onclick="nav('config')"><span class="icon">⚙️</span> Configuração</div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ── STATS ── -->
+    <div class="page active" id="page-stats">
+      <div class="page-header">
+        <div><div class="page-title">Estatísticas</div><div class="page-sub">Visão geral do bot</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="loadAll()">↺ Atualizar</button>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-val" id="s-groups">—</div><div class="stat-lbl">Grupos/canais</div></div>
+        <div class="stat-card"><div class="stat-val" id="s-welcomed">—</div><div class="stat-lbl">Boas-vindas enviadas</div></div>
+        <div class="stat-card"><div class="stat-val" id="s-broadcasts">—</div><div class="stat-lbl">Disparos feitos</div></div>
+        <div class="stat-card"><div class="stat-val" id="s-auto">—</div><div class="stat-lbl">Modo automático</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Grupos e canais ativos</div>
+        <div class="group-list" id="group-list"><div style="color:var(--muted);font-size:13px">Carregando...</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Histórico de disparos</div>
+        <div class="log-list" id="log-list"><div style="color:var(--muted);font-size:13px">Nenhum disparo ainda.</div></div>
+      </div>
+    </div>
+
+    <!-- ── BOAS-VINDAS ── -->
+    <div class="page" id="page-welcome">
+      <div class="page-header">
+        <div><div class="page-title">Boas-vindas</div><div class="page-sub">Enviada automaticamente quando alguém entra</div></div>
+      </div>
+      <div class="card">
+        <div class="toggle-row">
+          <div><div class="toggle-label">Ativar boas-vindas</div><div class="toggle-sub">Enviar mensagem para cada novo membro</div></div>
+          <label class="toggle"><input type="checkbox" id="w-enabled"><span class="slider"></span></label>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Mensagem</div>
+        <div class="field">
+          <label>Texto <span style="color:var(--muted)">(use {nome} para o nome do membro)</span></label>
+          <textarea id="w-text" rows="5"></textarea>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Tipo de mídia</label>
+            <select id="w-media">
+              <option value="none">Nenhuma</option>
+              <option value="photo">📷 Foto</option>
+              <option value="video">🎥 Vídeo</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>File ID da mídia</label>
+            <input type="text" id="w-fileid" placeholder="AgACAgI...">
+            <div class="hint">Envie a mídia pro bot no DM para obter o ID</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Botões com link</label>
+          <div class="btn-list" id="w-btn-list"></div>
+          <button class="add-line" onclick="addBtn('w')">＋ Adicionar botão</button>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveWelcome()">💾 Salvar boas-vindas</button>
+      </div>
+    </div>
+
+    <!-- ── BROADCAST ── -->
+    <div class="page" id="page-broadcast">
+      <div class="page-header">
+        <div><div class="page-title">Mensagem de disparo</div><div class="page-sub">Conteúdo enviado nos disparos manuais e automáticos</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Conteúdo</div>
+        <div class="field">
+          <label>Texto / Copy</label>
+          <textarea id="b-text" rows="6"></textarea>
+          <div class="hint">Suporta *negrito*, _itálico_, [texto](url)</div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Tipo de mídia</label>
+            <select id="b-media">
+              <option value="none">Nenhuma</option>
+              <option value="photo">📷 Foto</option>
+              <option value="video">🎥 Vídeo</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>File ID da mídia</label>
+            <input type="text" id="b-fileid" placeholder="AgACAgI...">
+          </div>
+        </div>
+        <div class="field">
+          <label>Botões com link</label>
+          <div class="btn-list" id="b-btn-list"></div>
+          <button class="add-line" onclick="addBtn('b')">＋ Adicionar botão</button>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveBroadcast()">💾 Salvar mensagem</button>
+      </div>
+    </div>
+
+    <!-- ── DISPATCH ── -->
+    <div class="page" id="page-dispatch">
+      <div class="page-header">
+        <div><div class="page-title">Disparar agora</div><div class="page-sub">Envio manual para todos os grupos</div></div>
+      </div>
+      <div class="dispatch-big">
+        <h2>📣 Disparo manual</h2>
+        <p id="dispatch-info">Envia a mensagem configurada para todos os grupos/canais ativos agora.</p>
+        <button class="btn btn-success dispatch-btn" id="dispatch-btn" onclick="doDispatch()">⚡ Disparar agora</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Preview da mensagem</div>
+        <div id="dispatch-preview" style="color:var(--muted);font-size:13px;white-space:pre-wrap;line-height:1.6"></div>
+      </div>
+    </div>
+
+    <!-- ── AUTO ── -->
+    <div class="page" id="page-auto">
+      <div class="page-header">
+        <div><div class="page-title">Disparo automático</div><div class="page-sub">Envia em intervalos regulares sem precisar de ação manual</div></div>
+      </div>
+      <div class="card">
+        <div class="toggle-row">
+          <div><div class="toggle-label">Ativar disparo automático</div><div class="toggle-sub">O bot vai enviar a mensagem de disparo automaticamente</div></div>
+          <label class="toggle"><input type="checkbox" id="auto-enabled"><span class="slider"></span></label>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Configuração</div>
+        <div class="field">
+          <label>Intervalo entre disparos</label>
+          <select id="auto-interval">
+            <option value="1">A cada 1 hora</option>
+            <option value="2">A cada 2 horas</option>
+            <option value="3">A cada 3 horas</option>
+            <option value="6">A cada 6 horas</option>
+            <option value="12">A cada 12 horas</option>
+            <option value="24">Uma vez por dia</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Próximo disparo</label>
+          <div id="auto-next" style="padding:9px 12px;background:var(--s3);border-radius:8px;font-size:13px;color:var(--muted)">—</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveAuto()">💾 Salvar configuração</button>
+      </div>
+    </div>
+
+    <!-- ── CONFIG ── -->
+    <div class="page" id="page-config">
+      <div class="page-header">
+        <div><div class="page-title">Configuração</div><div class="page-sub">Token e configurações gerais do bot</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Token do Telegram</div>
+        <div class="field">
+          <label>Token do @BotFather</label>
+          <input type="text" id="cfg-token" placeholder="1234567890:ABCdefGhIJKlmNOpqrSTUvwXYZ">
+          <div class="hint">Obtenha em @BotFather com /newbot. Após salvar, reinicie o bot.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Como obter File ID de mídia</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7">
+          1. Abra o Telegram e mande a foto ou vídeo diretamente para o seu bot (no chat privado com ele)<br>
+          2. O bot vai responder com o File ID automaticamente<br>
+          3. Copie o File ID e cole nos campos de mídia das telas acima
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Como hospedar gratuitamente</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.8">
+          <b style="color:var(--text)">Railway.app (recomendado)</b><br>
+          1. Crie conta em railway.app<br>
+          2. New Project → Deploy from GitHub (suba a pasta do bot)<br>
+          3. Adicione variável de ambiente: nenhuma necessária (token fica no data.json)<br>
+          4. O bot fica online 24h grátis<br><br>
+          <b style="color:var(--text)">Render.com (alternativa)</b><br>
+          1. Crie conta em render.com<br>
+          2. New Web Service → conecte o repositório<br>
+          3. Start command: <code style="background:var(--s3);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace">python bot.py</code>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveConfig()">💾 Salvar token</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let DATA = {};
+
+// ── NAV ──
+function nav(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (page === 'dispatch') renderDispatchPreview();
+}
+
+// ── TOAST ──
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── API ──
+async function api(method, path, body) {
+  const opts = { method, headers: {'Content-Type':'application/json'} };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  return r.json();
+}
+
+// ── LOAD ──
+async function loadAll() {
+  try {
+    DATA = await api('GET', '/api/data');
+    renderAll();
+  } catch(e) {
+    toast('Erro ao carregar dados', 'err');
+  }
+}
+
+function renderAll() {
+  // topbar
+  const t = DATA.token || '';
+  document.getElementById('top-token').textContent = t ? `@bot` : 'Sem token';
+  const sb = document.getElementById('top-status');
+  if (t) { sb.textContent = 'Online'; sb.className = 'badge'; }
+  else   { sb.textContent = 'Sem token'; sb.className = 'badge off'; }
+
+  renderStats();
+  renderWelcome();
+  renderBroadcast();
+  renderAuto();
+}
+
+// ── STATS ──
+function renderStats() {
+  const s = DATA.stats || {};
+  const groups = s.groups || {};
+  document.getElementById('s-groups').textContent = Object.keys(groups).length;
+  document.getElementById('s-welcomed').textContent = s.total_welcomed || 0;
+  document.getElementById('s-broadcasts').textContent = s.total_broadcasts || 0;
+  const ab = DATA.auto_broadcast || {};
+  document.getElementById('s-auto').textContent = ab.enabled ? `${ab.interval_hours}h` : 'Off';
+
+  // group list
+  const gl = document.getElementById('group-list');
+  const entries = Object.entries(groups);
+  if (!entries.length) {
+    gl.innerHTML = '<div style="color:var(--muted);font-size:13px">Nenhum grupo ainda. Adicione o bot como admin em um grupo.</div>';
+  } else {
+    gl.innerHTML = entries.map(([gid, g]) => `
+      <div class="group-row">
+        <div>
+          <div class="group-name">${esc(g.title || gid)}</div>
+          <div class="group-meta">ID: ${gid} · Entrou: ${fmtDate(g.joined_at)} · 👋 ${g.members_welcomed || 0} boas-vindas</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="group-tag">ativo</span>
+          <button class="btn btn-danger btn-sm" onclick="removeGroup('${gid}')">Remover</button>
+        </div>
+      </div>`).join('');
+  }
+
+  // log
+  const logs = (s.broadcast_log || []).slice().reverse();
+  const ll = document.getElementById('log-list');
+  if (!logs.length) {
+    ll.innerHTML = '<div style="color:var(--muted);font-size:13px">Nenhum disparo ainda.</div>';
+  } else {
+    ll.innerHTML = logs.map(l => `
+      <div class="log-row">
+        <div class="log-dot ${l.ok > 0 ? 'green' : 'amber'}"></div>
+        <div class="log-time">${fmtDate(l.at)}</div>
+        <div class="log-txt">✓ ${l.ok} enviados &nbsp; ✗ ${l.err} falhas</div>
+        <span class="log-type">${l.type}</span>
+      </div>`).join('');
+  }
+}
+
+// ── WELCOME ──
+function renderWelcome() {
+  const w = DATA.welcome || {};
+  document.getElementById('w-enabled').checked = !!w.enabled;
+  document.getElementById('w-text').value = w.text || '';
+  document.getElementById('w-media').value = w.media_type || 'none';
+  document.getElementById('w-fileid').value = w.file_id || '';
+  renderBtnList('w', w.buttons || []);
+}
+
+async function saveWelcome() {
+  const payload = {
+    welcome: {
+      enabled:    document.getElementById('w-enabled').checked,
+      text:       document.getElementById('w-text').value,
+      media_type: document.getElementById('w-media').value,
+      file_id:    document.getElementById('w-fileid').value,
+      buttons:    getBtns('w'),
+    }
+  };
+  const r = await api('POST', '/api/save', payload);
+  r.ok ? toast('✅ Boas-vindas salvas!') : toast('Erro ao salvar', 'err');
+  if (r.ok) DATA.welcome = payload.welcome;
+}
+
+// ── BROADCAST ──
+function renderBroadcast() {
+  const b = DATA.broadcast || {};
+  document.getElementById('b-text').value = b.text || '';
+  document.getElementById('b-media').value = b.media_type || 'none';
+  document.getElementById('b-fileid').value = b.file_id || '';
+  renderBtnList('b', b.buttons || []);
+}
+
+async function saveBroadcast() {
+  const payload = {
+    broadcast: {
+      text:       document.getElementById('b-text').value,
+      media_type: document.getElementById('b-media').value,
+      file_id:    document.getElementById('b-fileid').value,
+      buttons:    getBtns('b'),
+    }
+  };
+  const r = await api('POST', '/api/save', payload);
+  r.ok ? toast('✅ Mensagem salva!') : toast('Erro ao salvar', 'err');
+  if (r.ok) DATA.broadcast = payload.broadcast;
+}
+
+// ── AUTO ──
+function renderAuto() {
+  const ab = DATA.auto_broadcast || {};
+  document.getElementById('auto-enabled').checked = !!ab.enabled;
+  document.getElementById('auto-interval').value = String(ab.interval_hours || 1);
+  const last = ab.last_sent;
+  const next = document.getElementById('auto-next');
+  if (ab.enabled && last) {
+    const d = new Date(last);
+    d.setHours(d.getHours() + parseInt(ab.interval_hours || 1));
+    next.textContent = fmtDate(d.toISOString());
+    next.style.color = 'var(--text)';
+  } else if (ab.enabled) {
+    next.textContent = 'Em breve (aguardando 1ª checagem)';
+    next.style.color = 'var(--text)';
+  } else {
+    next.textContent = 'Automático desativado';
+    next.style.color = 'var(--muted)';
+  }
+}
+
+async function saveAuto() {
+  const payload = {
+    auto_broadcast: {
+      enabled:        document.getElementById('auto-enabled').checked,
+      interval_hours: parseInt(document.getElementById('auto-interval').value),
+    }
+  };
+  const r = await api('POST', '/api/save', payload);
+  r.ok ? toast('✅ Automático salvo!') : toast('Erro ao salvar', 'err');
+  if (r.ok) { DATA.auto_broadcast = {...DATA.auto_broadcast, ...payload.auto_broadcast}; renderAuto(); }
+}
+
+// ── CONFIG ──
+async function saveConfig() {
+  const token = document.getElementById('cfg-token').value.trim();
+  if (!token) { toast('Digite o token', 'err'); return; }
+  const r = await api('POST', '/api/save', { token });
+  if (r.ok) {
+    toast('✅ Token salvo! Reinicie o bot.');
+    document.getElementById('top-status').textContent = 'Reiniciar bot';
+    document.getElementById('top-status').className = 'badge';
+  } else {
+    toast('Erro ao salvar', 'err');
+  }
+}
+
+// ── DISPATCH ──
+function renderDispatchPreview() {
+  const b = DATA.broadcast || {};
+  const el = document.getElementById('dispatch-preview');
+  const groups = Object.keys((DATA.stats || {}).groups || {});
+  document.getElementById('dispatch-info').textContent =
+    `Enviará para ${groups.length} grupo(s)/canal(is) agora.`;
+  el.textContent = b.text || '(sem mensagem configurada)';
+  const btns = (b.buttons || []).filter(x=>x.title&&x.url);
+  if (btns.length) {
+    el.textContent += '\n\n' + btns.map(b=>`[ ${b.title} → ${b.url} ]`).join('\n');
+  }
+}
+
+async function doDispatch() {
+  const btn = document.getElementById('dispatch-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enviando...';
+  try {
+    const r = await api('POST', '/api/dispatch');
+    if (r.ok) {
+      toast(`✅ Disparado! ${r.sent} ok · ${r.failed} falhas`);
+      await loadAll();
+    } else {
+      toast(r.error || 'Erro ao disparar', 'err');
+    }
+  } catch(e) {
+    toast('Erro de conexão', 'err');
+  }
+  btn.disabled = false;
+  btn.textContent = '⚡ Disparar agora';
+}
+
+// ── GROUP REMOVE ──
+async function removeGroup(gid) {
+  if (!confirm('Remover esse grupo da lista?')) return;
+  const r = await api('DELETE', `/api/group/${gid}`);
+  if (r.ok) { toast('Grupo removido'); await loadAll(); }
+}
+
+// ── BUTTON LISTS ──
+function renderBtnList(prefix, buttons) {
+  const el = document.getElementById(prefix + '-btn-list');
+  el.innerHTML = '';
+  (buttons || []).forEach((b, i) => {
+    el.appendChild(makeBtnRow(prefix, b.title, b.url));
+  });
+}
+
+function makeBtnRow(prefix, title='', url='') {
+  const row = document.createElement('div');
+  row.className = 'btn-item';
+  row.innerHTML = `
+    <input type="text" placeholder="Título do botão" class="bi-title" value="${esc(title)}">
+    <input type="text" placeholder="https://t.me/..." class="bi-url" value="${esc(url)}">
+    <button class="remove-x" onclick="this.closest('.btn-item').remove()">×</button>`;
+  return row;
+}
+
+function addBtn(prefix) {
+  document.getElementById(prefix + '-btn-list').appendChild(makeBtnRow(prefix));
+}
+
+function getBtns(prefix) {
+  return Array.from(document.querySelectorAll(`#${prefix}-btn-list .btn-item`))
+    .map(row => ({
+      title: row.querySelector('.bi-title').value.trim(),
+      url:   row.querySelector('.bi-url').value.trim(),
+    }))
+    .filter(b => b.title && b.url);
+}
+
+// ── UTILS ──
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  } catch { return iso; }
+}
+
+// ── INIT ──
+loadAll();
+setInterval(loadAll, 30000); // atualiza a cada 30s
+</script>
+</body>
+</html>

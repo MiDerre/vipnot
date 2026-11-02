@@ -1,0 +1,27 @@
+{
+  "token": "9121517282:AAF8ElzePWHtJQS2MZ-W7iO9LqXibbNwP9E",
+  "welcome": {
+    "enabled": true,
+    "text": "👋 Bem-vindo(a), {nome}! 🔥\n\nVocê entrou no melhor VIP do Telegram.\nAproveite o conteúdo exclusivo! 😈",
+    "media_type": "none",
+    "file_id": "",
+    "buttons": []
+  },
+  "broadcast": {
+    "text": "🔥 *CONTEÚDO EXCLUSIVO* 🔥\n\nClique abaixo e acesse agora!",
+    "media_type": "none",
+    "file_id": "",
+    "buttons": []
+  },
+  "auto_broadcast": {
+    "enabled": false,
+    "interval_hours": 1,
+    "last_sent": null
+  },
+  "stats": {
+    "groups": {},
+    "total_welcomed": 0,
+    "total_broadcasts": 0,
+    "broadcast_log": []
+  }
+}
